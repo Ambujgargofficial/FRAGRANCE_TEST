@@ -4,34 +4,98 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fragrance Finder</title>
-    <!-- Tailwind CSS for styling -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- React and ReactDOM -->
+    <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <!-- Babel to convert JSX in browser -->
+    <!-- Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+
     <style>
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        body {
+            font-family: 'Outfit', sans-serif;
         }
-        .animate-fade-in {
-            animation: fadeIn 0.5s ease-out forwards;
+
+        /* Custom Animations */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
         }
-        .animate-fade-in-up {
-            animation: fadeIn 0.8s ease-out forwards;
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .animate-float { animation: float 6s ease-in-out infinite; }
+        .animate-float-delayed { animation: float 6s ease-in-out infinite 3s; }
+        .animate-slide-in { animation: slideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-pop-in { animation: popIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+        /* Custom Range Slider Styling */
+        input[type=range] {
+            -webkit-appearance: none; /* Hides the slider so that custom slider can be made */
+            width: 100%; 
+            background: transparent; /* Otherwise white in Chrome */
+        }
+        
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 28px;
+            width: 28px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 4px solid #9333ea; /* Purple-600 */
+            cursor: pointer;
+            margin-top: -10px; /* You need to specify a margin in Chrome, but in Firefox and IE it is automatic */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: transform 0.1s;
+        }
+
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            background: #e9d5ff; /* Purple-200 */
+            border-radius: 999px;
+        }
+
+        /* Glassmorphism Card */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-slate-50 to-purple-50 min-h-screen">
+<body class="bg-slate-50 min-h-screen overflow-x-hidden relative">
+    
+    <!-- Animated Background Blobs -->
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+        <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float"></div>
+        <div class="absolute top-[20%] right-[-5%] w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float-delayed"></div>
+        <div class="absolute bottom-[-10%] left-[20%] w-80 h-80 bg-indigo-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float"></div>
+    </div>
+
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState } = React;
+        const { useState, useEffect } = React;
 
-        // --- ICONS (Inline SVG components to work without npm) ---
+        // --- ICONS ---
         const Wind = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/></svg>;
         const Zap = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>;
         const Brain = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>;
@@ -44,126 +108,18 @@
 
         // --- DATA ---
         const FRAGRANCE_DB = [
-            {
-                id: 1,
-                name: "Tranquil Sleep",
-                primaryNeed: "SI", 
-                secondaryNeed: "EI",
-                triggers: { SI: 9, EI: 2, FI: 0, EnI: 0, SEI: 5 }, 
-                description: "Deep relaxation for poor sleep and high stress.",
-                moods: ["Relaxation", "Anxiety Relief", "Insomnia Aid"],
-                iconComponent: Wind
-            },
-            {
-                id: 2,
-                name: "Morning Vitality",
-                primaryNeed: "EI", 
-                secondaryNeed: "SI",
-                triggers: { SI: 3, EI: 9, FI: 5, EnI: 0, SEI: 0 },
-                description: "Gentle awakening for morning fatigue and low energy.",
-                moods: ["Gentle Awakening", "Mood Uplift", "Energy Boost"],
-                iconComponent: Zap
-            },
-            {
-                id: 3,
-                name: "Focus Flow",
-                primaryNeed: "FI", 
-                secondaryNeed: "SI",
-                triggers: { SI: 5, EI: 5, FI: 9, EnI: 0, SEI: 0 },
-                description: "Enhances concentration and mental clarity for desk work.",
-                moods: ["High Focus", "Mental Clarity", "Concentration"],
-                iconComponent: Brain
-            },
-            {
-                id: 4,
-                name: "Emotional Balance",
-                primaryNeed: "SEI", 
-                secondaryNeed: "SI",
-                triggers: { SI: 6, EI: 5, FI: 0, EnI: 0, SEI: 9 },
-                description: "Grounding and stability for emotional swings.",
-                moods: ["Inner Stability", "Grounding", "Calm"],
-                iconComponent: Heart
-            },
-            {
-                id: 5,
-                name: "Calm Confidence",
-                primaryNeed: "SI", 
-                secondaryNeed: "FI",
-                triggers: { SI: 8, EI: 6, FI: 7, EnI: 0, SEI: 4 },
-                description: "Boosts presence and reduces anxiety during high interaction.",
-                moods: ["Confidence", "Presence", "Networking"],
-                iconComponent: Sparkles
-            },
-            {
-                id: 6,
-                name: "Digital Detox",
-                primaryNeed: "EnI", 
-                secondaryNeed: "SI",
-                triggers: { SI: 6, EI: 4, FI: 0, EnI: 9, SEI: 5 },
-                description: "Eye relief and sensory relaxation for high screen users.",
-                moods: ["Eye Relief", "Senses Relaxation", "Unplugging"],
-                iconComponent: Activity
-            },
-            {
-                id: 7,
-                name: "Urban Shield",
-                primaryNeed: "EnI", 
-                secondaryNeed: "EI",
-                triggers: { SI: 5, EI: 5, FI: 0, EnI: 10, SEI: 2 },
-                description: "Refreshing and cleansing against harsh environments.",
-                moods: ["Refreshing", "Cleansing", "Protection"],
-                iconComponent: Trees
-            },
-            {
-                id: 8,
-                name: "Meditative Stillness",
-                primaryNeed: "SI", 
-                secondaryNeed: "SEI",
-                triggers: { SI: 8, EI: 3, FI: 6, EnI: 0, SEI: 7 },
-                description: "Deep calm for introspection and mindfulness.",
-                moods: ["Deep Calm", "Introspection", "Mindfulness"],
-                iconComponent: Wind
-            },
-            {
-                id: 9,
-                name: "Fresh Optimism",
-                primaryNeed: "EI", 
-                secondaryNeed: "SEI",
-                triggers: { SI: 4, EI: 8, FI: 0, EnI: 0, SEI: 7 },
-                description: "Uplifts low mood and emotional flatness.",
-                moods: ["Emotional Uplift", "Motivation", "Joy"],
-                iconComponent: Zap
-            },
-            {
-                id: 10,
-                name: "Warm Comfort",
-                primaryNeed: "SEI", 
-                secondaryNeed: "SI",
-                triggers: { SI: 7, EI: 2, FI: 0, EnI: 0, SEI: 10 },
-                description: "Safe, nurturing relaxation for emotional fatigue.",
-                moods: ["Security", "Nurturing", "Relaxation"],
-                iconComponent: Heart
-            },
-            {
-                id: 11,
-                name: "Creative Spark",
-                primaryNeed: "FI", 
-                secondaryNeed: "EI",
-                triggers: { SI: 2, EI: 7, FI: 10, EnI: 0, SEI: 6 },
-                description: "Unlocks imagination and flows through creative blocks.",
-                moods: ["Inspiration", "Imagination Flow", "Creativity"],
-                iconComponent: Brain
-            },
-            {
-                id: 12,
-                name: "Balanced Everyday",
-                primaryNeed: "BAL",
-                secondaryNeed: "BAL",
-                triggers: { SI: 5, EI: 5, FI: 5, EnI: 5, SEI: 5 },
-                description: "A neutral, stable fragrance for general lifestyle.",
-                moods: ["Stability", "Neutral", "Daily Wear"],
-                iconComponent: RefreshCw
-            }
+            { id: 1, name: "Tranquil Sleep", primaryNeed: "SI", secondaryNeed: "EI", triggers: { SI: 9, EI: 2, FI: 0, EnI: 0, SEI: 5 }, description: "Deep relaxation for poor sleep and high stress.", moods: ["Relaxation", "Anxiety Relief", "Insomnia Aid"], iconComponent: Wind },
+            { id: 2, name: "Morning Vitality", primaryNeed: "EI", secondaryNeed: "SI", triggers: { SI: 3, EI: 9, FI: 5, EnI: 0, SEI: 0 }, description: "Gentle awakening for morning fatigue and low energy.", moods: ["Gentle Awakening", "Mood Uplift", "Energy Boost"], iconComponent: Zap },
+            { id: 3, name: "Focus Flow", primaryNeed: "FI", secondaryNeed: "SI", triggers: { SI: 5, EI: 5, FI: 9, EnI: 0, SEI: 0 }, description: "Enhances concentration and mental clarity for desk work.", moods: ["High Focus", "Mental Clarity", "Concentration"], iconComponent: Brain },
+            { id: 4, name: "Emotional Balance", primaryNeed: "SEI", secondaryNeed: "SI", triggers: { SI: 6, EI: 5, FI: 0, EnI: 0, SEI: 9 }, description: "Grounding and stability for emotional swings.", moods: ["Inner Stability", "Grounding", "Calm"], iconComponent: Heart },
+            { id: 5, name: "Calm Confidence", primaryNeed: "SI", secondaryNeed: "FI", triggers: { SI: 8, EI: 6, FI: 7, EnI: 0, SEI: 4 }, description: "Boosts presence and reduces anxiety during high interaction.", moods: ["Confidence", "Presence", "Networking"], iconComponent: Sparkles },
+            { id: 6, name: "Digital Detox", primaryNeed: "EnI", secondaryNeed: "SI", triggers: { SI: 6, EI: 4, FI: 0, EnI: 9, SEI: 5 }, description: "Eye relief and sensory relaxation for high screen users.", moods: ["Eye Relief", "Senses Relaxation", "Unplugging"], iconComponent: Activity },
+            { id: 7, name: "Urban Shield", primaryNeed: "EnI", secondaryNeed: "EI", triggers: { SI: 5, EI: 5, FI: 0, EnI: 10, SEI: 2 }, description: "Refreshing and cleansing against harsh environments.", moods: ["Refreshing", "Cleansing", "Protection"], iconComponent: Trees },
+            { id: 8, name: "Meditative Stillness", primaryNeed: "SI", secondaryNeed: "SEI", triggers: { SI: 8, EI: 3, FI: 6, EnI: 0, SEI: 7 }, description: "Deep calm for introspection and mindfulness.", moods: ["Deep Calm", "Introspection", "Mindfulness"], iconComponent: Wind },
+            { id: 9, name: "Fresh Optimism", primaryNeed: "EI", secondaryNeed: "SEI", triggers: { SI: 4, EI: 8, FI: 0, EnI: 0, SEI: 7 }, description: "Uplifts low mood and emotional flatness.", moods: ["Emotional Uplift", "Motivation", "Joy"], iconComponent: Zap },
+            { id: 10, name: "Warm Comfort", primaryNeed: "SEI", secondaryNeed: "SI", triggers: { SI: 7, EI: 2, FI: 0, EnI: 0, SEI: 10 }, description: "Safe, nurturing relaxation for emotional fatigue.", moods: ["Security", "Nurturing", "Relaxation"], iconComponent: Heart },
+            { id: 11, name: "Creative Spark", primaryNeed: "FI", secondaryNeed: "EI", triggers: { SI: 2, EI: 7, FI: 10, EnI: 0, SEI: 6 }, description: "Unlocks imagination and flows through creative blocks.", moods: ["Inspiration", "Imagination Flow", "Creativity"], iconComponent: Brain },
+            { id: 12, name: "Balanced Everyday", primaryNeed: "BAL", secondaryNeed: "BAL", triggers: { SI: 5, EI: 5, FI: 5, EnI: 5, SEI: 5 }, description: "A neutral, stable fragrance for general lifestyle.", moods: ["Stability", "Neutral", "Daily Wear"], iconComponent: RefreshCw }
         ];
 
         const INDEX_FULL_NAMES = {
@@ -175,12 +131,80 @@
             BAL: "General Lifestyle Balance"
         };
 
-        // --- APP COMPONENT ---
+        // --- COMPONENTS ---
+        
+        const ProgressBar = ({ step, totalSteps }) => {
+            const percentage = Math.min(100, (step / totalSteps) * 100);
+            return (
+                <div className="w-full bg-gray-200 h-2 fixed top-0 left-0 z-50">
+                    <div 
+                        className="bg-purple-600 h-2 transition-all duration-500 ease-out" 
+                        style={{ width: `${percentage}%` }}
+                    ></div>
+                </div>
+            );
+        };
+
+        const QuestionCard = ({ title, description, indexKey, icon: Icon, nextStep, prevStep, isLast, value, onChange }) => {
+            return (
+                <div className="glass-card p-6 md:p-10 rounded-3xl shadow-2xl w-full max-w-lg mx-auto animate-pop-in border-t-4 border-purple-500">
+                    <div className="flex flex-col items-center mb-6">
+                        <div className="p-4 bg-purple-100 rounded-full text-purple-600 mb-4 shadow-inner">
+                            <Icon className="w-10 h-10" />
+                        </div>
+                        <h2 className="text-sm font-bold uppercase tracking-widest text-purple-600 mb-1">{indexKey} Assessment</h2>
+                        <h3 className="text-3xl font-bold text-gray-800 text-center leading-tight">{title}</h3>
+                    </div>
+                    
+                    <p className="text-gray-500 text-center mb-10 text-lg leading-relaxed">{description}</p>
+
+                    <div className="mb-10 px-2">
+                        <div className="flex justify-between text-xs font-bold text-gray-400 uppercase tracking-wide mb-4">
+                            <span>Low</span>
+                            <span>Moderate</span>
+                            <span>High</span>
+                        </div>
+                        
+                        <div className="relative group">
+                            <input 
+                                type="range" 
+                                min="0" 
+                                max="10" 
+                                value={value} 
+                                onChange={(e) => onChange(e.target.value)}
+                            />
+                        </div>
+                        
+                        <div className="mt-6 text-center">
+                            <span className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">
+                                {value}
+                            </span>
+                            <span className="text-lg text-gray-400 font-medium ml-1">/ 10</span>
+                        </div>
+                    </div>
+
+                    <div className="flex justify-between items-center gap-4">
+                        <button 
+                            onClick={prevStep} 
+                            className="px-6 py-3 rounded-xl font-semibold text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-all"
+                        >
+                            Back
+                        </button>
+                        <button 
+                            onClick={nextStep} 
+                            className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-3 rounded-xl font-bold text-lg shadow-lg shadow-purple-200 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                        >
+                            {isLast ? "Reveal Match" : "Next Question"} <ArrowRight className="w-5 h-5" />
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- MAIN APP ---
         function FragranceSurvey() {
             const [step, setStep] = useState(0);
-            const [scores, setScores] = useState({
-                SI: 5, EI: 5, FI: 5, EnI: 5, SEI: 5
-            });
+            const [scores, setScores] = useState({ SI: 5, EI: 5, FI: 5, EnI: 5, SEI: 5 });
             const [result, setResult] = useState(null);
 
             const handleScoreChange = (indexKey, value) => {
@@ -190,20 +214,15 @@
             const calculateResult = () => {
                 const entries = Object.entries(scores);
                 entries.sort((a, b) => b[1] - a[1]);
-                const dominantIndex = entries[0][0];
-
+                
                 const isBalanced = entries.every(([key, val]) => val >= 4 && val <= 6);
-                if (isBalanced) {
-                    return FRAGRANCE_DB.find(f => f.name === "Balanced Everyday");
-                }
+                if (isBalanced) return FRAGRANCE_DB.find(f => f.name === "Balanced Everyday");
 
                 const scoredFragrances = FRAGRANCE_DB.map(frag => {
                     let diffScore = 0;
-                    diffScore += Math.abs(scores.SI - frag.triggers.SI);
-                    diffScore += Math.abs(scores.EI - frag.triggers.EI);
-                    diffScore += Math.abs(scores.FI - frag.triggers.FI);
-                    diffScore += Math.abs(scores.EnI - frag.triggers.EnI);
-                    diffScore += Math.abs(scores.SEI - frag.triggers.SEI);
+                    Object.keys(scores).forEach(key => {
+                        diffScore += Math.abs(scores[key] - frag.triggers[key]);
+                    });
                     return { ...frag, matchScore: diffScore };
                 });
 
@@ -223,71 +242,28 @@
                 setResult(null);
             };
 
-            // Components
-            const QuestionCard = ({ title, description, indexKey, icon: Icon, nextStep, prevStep, isLast }) => (
-                <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full animate-fade-in mx-4">
-                    <div className="flex items-center gap-3 mb-4 text-purple-600">
-                        <Icon className="w-8 h-8" />
-                        <h2 className="text-xl font-bold uppercase tracking-wider">{indexKey} Assessment</h2>
-                    </div>
-                    
-                    <h3 className="text-2xl font-semibold text-gray-800 mb-2">{title}</h3>
-                    <p className="text-gray-500 mb-8">{description}</p>
-
-                    <div className="mb-8">
-                        <div className="flex justify-between text-sm font-medium text-gray-400 mb-2">
-                            <span>Low</span>
-                            <span>Moderate</span>
-                            <span>High</span>
-                        </div>
-                        <input 
-                            type="range" 
-                            min="0" 
-                            max="10" 
-                            value={scores[indexKey]} 
-                            onChange={(e) => handleScoreChange(indexKey, e.target.value)}
-                            className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-purple-600 hover:accent-purple-500 transition-all"
-                        />
-                        <div className="mt-4 text-center font-bold text-3xl text-purple-600">
-                            {scores[indexKey]}<span className="text-sm text-gray-400 font-normal">/10</span>
-                        </div>
-                    </div>
-
-                    <div className="flex justify-between pt-4 border-t border-gray-100">
-                        <button 
-                            onClick={prevStep} 
-                            disabled={step === 1}
-                            className={`px-6 py-2 rounded-lg font-medium transition-colors ${step === 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600 hover:bg-gray-100'}`}
-                        >
-                            Back
-                        </button>
-                        <button 
-                            onClick={isLast ? finishSurvey : nextStep} 
-                            className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-2 rounded-lg font-medium flex items-center gap-2 transition-transform active:scale-95 shadow-lg shadow-purple-200"
-                        >
-                            {isLast ? "Find Match" : "Next"} <ArrowRight className="w-4 h-4" />
-                        </button>
-                    </div>
-                </div>
-            );
-
             return (
-                <div className="flex flex-col items-center justify-center w-full max-w-5xl mx-auto">
+                <div className="min-h-screen flex flex-col items-center justify-center p-4 md:p-8 relative z-10">
                     
+                    {step > 0 && step < 6 && <ProgressBar step={step} totalSteps={5} />}
+
                     {step === 0 && (
-                        <div className="text-center max-w-xl animate-fade-in-up px-4">
-                            <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <Sparkles className="w-8 h-8 text-purple-600" />
+                        <div className="text-center max-w-2xl w-full animate-pop-in glass-card p-8 md:p-12 rounded-[2.5rem] shadow-2xl mx-4">
+                            <div className="bg-gradient-to-tr from-purple-100 to-pink-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
+                                <Sparkles className="w-12 h-12 text-purple-600 animate-pulse" />
                             </div>
-                            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
-                                Discover Your <br/> <span className="text-purple-600">Soul Fragrance</span>
+                            <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 mb-6 leading-tight tracking-tight">
+                                Find Your <br/> 
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">
+                                    Soul Fragrance
+                                </span>
                             </h1>
-                            <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-                                Based on your Stress, Energy, Focus, Environment, and Emotional Sensitivity indices.
+                            <p className="text-lg md:text-xl text-gray-600 mb-10 leading-relaxed max-w-lg mx-auto">
+                                An intelligent scent recommender based on your unique Stress, Energy, and Focus profile.
                             </p>
                             <button 
                                 onClick={() => setStep(1)}
-                                className="bg-purple-600 hover:bg-purple-700 text-white text-lg px-10 py-4 rounded-full font-semibold shadow-xl shadow-purple-200 transition-all hover:-translate-y-1 active:translate-y-0"
+                                className="w-full md:w-auto bg-gray-900 hover:bg-black text-white text-xl px-12 py-5 rounded-2xl font-bold shadow-xl transition-all hover:-translate-y-1 active:translate-y-0"
                             >
                                 Start Assessment
                             </button>
@@ -297,9 +273,11 @@
                     {step === 1 && (
                         <QuestionCard 
                             indexKey="SI"
+                            value={scores.SI}
+                            onChange={(val) => handleScoreChange('SI', val)}
                             icon={Wind}
                             title="Stress Index"
-                            description="How would you rate your current stress levels? Do you feel anxious, overwhelmed, or do you have trouble sleeping?"
+                            description="Rate your current stress level. Are you feeling anxious, overwhelmed, or having trouble sleeping?"
                             nextStep={() => setStep(2)}
                             prevStep={() => setStep(0)}
                         />
@@ -308,9 +286,11 @@
                     {step === 2 && (
                         <QuestionCard 
                             indexKey="EI"
+                            value={scores.EI}
+                            onChange={(val) => handleScoreChange('EI', val)}
                             icon={Zap}
                             title="Energy Index"
-                            description="How is your vitality? Are you feeling energetic and ready to go, or fatigued and slow?"
+                            description="How is your vitality? Are you feeling energetic and ready, or fatigued and slow?"
                             nextStep={() => setStep(3)}
                             prevStep={() => setStep(1)}
                         />
@@ -319,9 +299,11 @@
                     {step === 3 && (
                         <QuestionCard 
                             indexKey="FI"
+                            value={scores.FI}
+                            onChange={(val) => handleScoreChange('FI', val)}
                             icon={Brain}
                             title="Focus Index"
-                            description="Do you need mental clarity right now? Are you working on complex tasks or feeling mentally scattered?"
+                            description="Do you need mental clarity? Are you working on complex tasks or feeling scattered?"
                             nextStep={() => setStep(4)}
                             prevStep={() => setStep(2)}
                         />
@@ -330,9 +312,11 @@
                     {step === 4 && (
                         <QuestionCard 
                             indexKey="EnI"
+                            value={scores.EnI}
+                            onChange={(val) => handleScoreChange('EnI', val)}
                             icon={Trees}
                             title="Environment Index"
-                            description="Consider your surroundings. Are you exposed to pollution, harsh weather, or excessive screen time (digital smog)?"
+                            description="Consider your surroundings. Are you exposed to pollution, harsh weather, or digital smog?"
                             nextStep={() => setStep(5)}
                             prevStep={() => setStep(3)}
                         />
@@ -341,78 +325,79 @@
                     {step === 5 && (
                         <QuestionCard 
                             indexKey="SEI"
+                            value={scores.SEI}
+                            onChange={(val) => handleScoreChange('SEI', val)}
                             icon={Heart}
                             title="Sensitivity Index"
-                            description="How emotionally sensitive or vulnerable do you feel? Do you need nurturing and emotional grounding?"
+                            description="How emotionally vulnerable do you feel? Do you need nurturing and grounding?"
                             isLast={true}
-                            nextStep={() => {}}
+                            nextStep={finishSurvey}
                             prevStep={() => setStep(4)}
                         />
                     )}
 
+                    {/* FINAL RESULT SCREEN */}
                     {step === 6 && result && (
-                        <div className="max-w-3xl w-full animate-fade-in bg-white p-8 md:p-12 rounded-3xl shadow-2xl border-t-8 border-purple-600 mx-4">
+                        <div className="max-w-4xl w-full animate-pop-in glass-card rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[500px]">
                             
-                            <div className="flex flex-col md:flex-row items-start md:items-center gap-6 mb-8 border-b border-gray-100 pb-8">
-                                <div className="bg-purple-100 p-4 rounded-2xl text-purple-600">
-                                    <result.iconComponent className="w-8 h-8" />
-                                </div>
-                                <div>
-                                    <h2 className="text-3xl font-bold text-gray-900">Recommended Match</h2>
-                                    <p className="text-gray-500">Based on your unique index profile</p>
-                                </div>
-                            </div>
-
-                            <div className="space-y-6 text-lg font-medium text-gray-800">
+                            {/* Left Side: Visual */}
+                            <div className="md:w-1/3 bg-gradient-to-br from-purple-600 to-pink-600 p-8 md:p-12 text-white flex flex-col justify-between relative overflow-hidden">
+                                <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
                                 
-                                {/* ID Section */}
-                                <div className="flex flex-col sm:flex-row sm:items-baseline border-b border-gray-100 pb-4">
-                                    <span className="text-purple-600 font-bold uppercase tracking-wider w-40 text-sm sm:text-base">
-                                        ID:
-                                    </span>
-                                    <span className="text-2xl font-mono text-gray-900">
-                                        #{result.id.toString().padStart(3, '0')}
-                                    </span>
+                                <div className="relative z-10">
+                                    <div className="text-purple-200 font-bold uppercase tracking-widest text-sm mb-2">Match ID</div>
+                                    <div className="text-4xl font-mono font-bold">#{result.id.toString().padStart(3, '0')}</div>
                                 </div>
 
-                                {/* Name Section */}
-                                <div className="flex flex-col sm:flex-row sm:items-baseline border-b border-gray-100 pb-4">
-                                    <span className="text-purple-600 font-bold uppercase tracking-wider w-40 text-sm sm:text-base">
-                                        Name:
-                                    </span>
-                                    <span className="text-2xl font-bold text-gray-900">
-                                        {result.name}
-                                    </span>
+                                <div className="relative z-10 flex flex-col items-center my-8">
+                                    <div className="bg-white/20 backdrop-blur-md p-6 rounded-full mb-6">
+                                        <result.iconComponent className="w-16 h-16 text-white" />
+                                    </div>
+                                    <div className="text-center font-medium text-purple-100">
+                                        {INDEX_FULL_NAMES[result.primaryNeed]}
+                                    </div>
                                 </div>
 
-                                {/* Primary Need Section */}
-                                <div className="flex flex-col sm:flex-row sm:items-baseline border-b border-gray-100 pb-4">
-                                    <span className="text-purple-600 font-bold uppercase tracking-wider w-40 text-sm sm:text-base">
-                                        Primary Need:
-                                    </span>
-                                    <span className="text-xl text-gray-700">
-                                        {INDEX_FULL_NAMES[result.primaryNeed] || result.primaryNeed}
-                                    </span>
+                                <div className="relative z-10 text-xs text-purple-200 text-center opacity-75">
+                                    Generated by Fragrance AI
                                 </div>
-
-                                {/* Purpose Section */}
-                                <div className="flex flex-col sm:flex-row sm:items-start">
-                                    <span className="text-purple-600 font-bold uppercase tracking-wider w-40 text-sm sm:text-base mt-1">
-                                        Purpose:
-                                    </span>
-                                    <span className="text-xl text-gray-700 leading-relaxed">
-                                        {result.description}
-                                    </span>
-                                </div>
-
                             </div>
 
-                            <div className="mt-10 pt-8 border-t border-gray-200 flex justify-center">
+                            {/* Right Side: Content */}
+                            <div className="md:w-2/3 p-8 md:p-12 flex flex-col justify-center bg-white/50">
+                                <div className="mb-2">
+                                    <span className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
+                                        Top Recommendation
+                                    </span>
+                                </div>
+                                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">{result.name}</h2>
+                                <p className="text-xl text-gray-600 mb-8 leading-relaxed font-light">
+                                    {result.description}
+                                </p>
+
+                                <div className="space-y-4 mb-10">
+                                    <div className="flex items-start">
+                                        <div className="w-32 flex-shrink-0 text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Primary Need</div>
+                                        <div className="font-semibold text-gray-800">{INDEX_FULL_NAMES[result.primaryNeed]}</div>
+                                    </div>
+                                    <div className="flex items-start">
+                                        <div className="w-32 flex-shrink-0 text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Triggers</div>
+                                        <div className="flex flex-wrap gap-2">
+                                            {result.moods.map((m, i) => (
+                                                <span key={i} className="text-sm bg-gray-100 text-gray-600 px-3 py-1 rounded-md border border-gray-200">
+                                                    {m}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <button 
                                     onClick={resetSurvey}
-                                    className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-8 py-3 rounded-xl font-semibold transition-colors flex items-center gap-2"
+                                    className="self-start flex items-center gap-2 text-gray-500 font-semibold hover:text-purple-600 transition-colors group"
                                 >
-                                    <RefreshCw className="w-5 h-5" /> Start New Survey
+                                    <RefreshCw className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />
+                                    Start New Assessment
                                 </button>
                             </div>
 
