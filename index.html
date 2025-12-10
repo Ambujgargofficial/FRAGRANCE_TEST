@@ -40,36 +40,54 @@
         .animate-slide-in { animation: slideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         .animate-pop-in { animation: popIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
-        /* Custom Range Slider Styling */
+        /* --- NEW COOL SLIDER STYLING --- */
         input[type=range] {
-            -webkit-appearance: none; /* Hides the slider so that custom slider can be made */
+            -webkit-appearance: none; 
             width: 100%; 
-            background: transparent; /* Otherwise white in Chrome */
+            background: transparent; 
+            height: 12px;
+            border-radius: 999px;
+            cursor: pointer;
+            /* Focus outline remove */
+            outline: none;
         }
         
+        /* Thumb (The Circle) */
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            height: 28px;
-            width: 28px;
+            height: 32px;
+            width: 32px;
             border-radius: 50%;
             background: #ffffff;
-            border: 4px solid #9333ea; /* Purple-600 */
-            cursor: pointer;
-            margin-top: -10px; /* You need to specify a margin in Chrome, but in Firefox and IE it is automatic */
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            transition: transform 0.1s;
+            /* Uses the 'color' property set in React for dynamic border color */
+            border: 4px solid currentColor; 
+            margin-top: -10px; 
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: transform 0.1s, border-color 0.3s ease;
         }
 
         input[type=range]::-webkit-slider-thumb:hover {
-            transform: scale(1.1);
+            transform: scale(1.15);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
         }
 
+        /* Track (The Line) - Styling handled in React inline styles for dynamic fill */
         input[type=range]::-webkit-slider-runnable-track {
             width: 100%;
-            height: 8px;
-            cursor: pointer;
-            background: #e9d5ff; /* Purple-200 */
+            height: 12px;
             border-radius: 999px;
+        }
+
+        /* Firefox Support */
+        input[type=range]::-moz-range-thumb {
+            height: 32px;
+            width: 32px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 4px solid currentColor;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: transform 0.1s;
         }
 
         /* Glassmorphism Card */
@@ -146,13 +164,35 @@
         };
 
         const QuestionCard = ({ title, description, indexKey, icon: Icon, nextStep, prevStep, isLast, value, onChange }) => {
+            
+            // --- DYNAMIC COLOR LOGIC ---
+            const getTheme = (val) => {
+                if (val <= 3) return { 
+                    color: '#22d3ee', // Cyan-400 (Cool/Low)
+                    label: 'Low',
+                    bgGradient: `linear-gradient(90deg, #22d3ee 0%, #22d3ee ${val*10}%, #e2e8f0 ${val*10}%, #e2e8f0 100%)`
+                };
+                if (val <= 7) return { 
+                    color: '#a855f7', // Purple-500 (Mid)
+                    label: 'Moderate',
+                    bgGradient: `linear-gradient(90deg, #a855f7 0%, #a855f7 ${val*10}%, #e2e8f0 ${val*10}%, #e2e8f0 100%)`
+                };
+                return { 
+                    color: '#f43f5e', // Rose-500 (High)
+                    label: 'High',
+                    bgGradient: `linear-gradient(90deg, #f43f5e 0%, #f43f5e ${val*10}%, #e2e8f0 ${val*10}%, #e2e8f0 100%)`
+                };
+            };
+
+            const theme = getTheme(value);
+
             return (
-                <div className="glass-card p-6 md:p-10 rounded-3xl shadow-2xl w-full max-w-lg mx-auto animate-pop-in border-t-4 border-purple-500">
+                <div className="glass-card p-6 md:p-10 rounded-3xl shadow-2xl w-full max-w-lg mx-auto animate-pop-in border-t-4" style={{ borderColor: theme.color }}>
                     <div className="flex flex-col items-center mb-6">
-                        <div className="p-4 bg-purple-100 rounded-full text-purple-600 mb-4 shadow-inner">
+                        <div className="p-4 rounded-full mb-4 shadow-inner transition-colors duration-300" style={{ backgroundColor: `${theme.color}20`, color: theme.color }}>
                             <Icon className="w-10 h-10" />
                         </div>
-                        <h2 className="text-sm font-bold uppercase tracking-widest text-purple-600 mb-1">{indexKey} Assessment</h2>
+                        <h2 className="text-sm font-bold uppercase tracking-widest mb-1 transition-colors duration-300" style={{ color: theme.color }}>{indexKey} Assessment</h2>
                         <h3 className="text-3xl font-bold text-gray-800 text-center leading-tight">{title}</h3>
                     </div>
                     
@@ -172,14 +212,20 @@
                                 max="10" 
                                 value={value} 
                                 onChange={(e) => onChange(e.target.value)}
+                                style={{ 
+                                    background: theme.bgGradient,
+                                    color: theme.color /* Passes color to thumb border via currentColor */
+                                }}
                             />
                         </div>
                         
-                        <div className="mt-6 text-center">
-                            <span className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">
+                        <div className="mt-8 text-center transition-all duration-300 transform" key={value}>
+                            <div className="text-6xl font-extrabold transition-colors duration-300" style={{ color: theme.color }}>
                                 {value}
-                            </span>
-                            <span className="text-lg text-gray-400 font-medium ml-1">/ 10</span>
+                            </div>
+                            <div className="text-sm font-bold uppercase tracking-widest mt-1 opacity-60" style={{ color: theme.color }}>
+                                {theme.label} Intensity
+                            </div>
                         </div>
                     </div>
 
@@ -192,9 +238,10 @@
                         </button>
                         <button 
                             onClick={nextStep} 
-                            className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-3 rounded-xl font-bold text-lg shadow-lg shadow-purple-200 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                            className="flex-1 text-white px-8 py-3 rounded-xl font-bold text-lg shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                            style={{ backgroundColor: theme.color, boxShadow: `0 10px 20px -10px ${theme.color}` }}
                         >
-                            {isLast ? "Reveal Match" : "Next Question"} <ArrowRight className="w-5 h-5" />
+                            {isLast ? "Reveal Match" : "Next"} <ArrowRight className="w-5 h-5" />
                         </button>
                     </div>
                 </div>
