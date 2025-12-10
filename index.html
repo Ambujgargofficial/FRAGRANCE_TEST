@@ -22,7 +22,7 @@
         h1, h2, h3, .serif-font { font-family: 'Playfair Display', serif; }
 
         /* Smooth Fade In */
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
 
         /* SASSY GRADIENT BACKGROUND */
@@ -60,31 +60,32 @@
         input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; cursor: pointer; }
         input[type=range]::-webkit-slider-thumb { 
             -webkit-appearance: none; 
-            height: 32px; 
-            width: 32px; 
+            height: 36px; 
+            width: 36px; 
             border-radius: 50%; 
             background: #fff; 
             border: 6px solid currentColor; 
-            margin-top: -12px; 
+            margin-top: -14px; 
             box-shadow: 0 4px 10px rgba(0,0,0,0.15); 
             transition: transform 0.1s; 
         }
-        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
-        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; border-radius: 999px; }
+        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 10px; border-radius: 999px; }
         
         /* Option Button */
         .option-btn {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .option-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px -4px rgba(147, 51, 234, 0.15);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px -5px rgba(147, 51, 234, 0.2);
         }
         .option-btn.active {
             background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
             border-color: #9333ea;
             color: #6b21a8;
-            box-shadow: 0 4px 12px -2px rgba(147, 51, 234, 0.3);
+            box-shadow: 0 8px 20px -2px rgba(147, 51, 234, 0.3);
+            transform: scale(1.02);
         }
     </style>
 </head>
@@ -177,32 +178,47 @@
             const sliderColor = answer > 7 ? '#db2777' : answer > 4 ? '#9333ea' : '#4f46e5';
 
             return (
-                <div className="bg-white/80 backdrop-blur-xl p-8 md:p-10 rounded-3xl shadow-lg border border-white/60 mb-8 transition-all hover:shadow-2xl hover:scale-[1.01] animate-fade-in group">
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="p-3 bg-fuchsia-50 text-fuchsia-600 rounded-2xl shadow-inner group-hover:bg-fuchsia-100 transition-colors">
-                            <Icon className="w-6 h-6" />
+                <div className="bg-white/80 backdrop-blur-xl p-8 md:p-12 rounded-3xl shadow-lg border border-white/60 w-full animate-fade-in flex flex-col justify-center min-h-[400px]">
+                    <div className="flex items-center gap-4 mb-8 justify-center">
+                        <div className="p-4 bg-fuchsia-50 text-fuchsia-600 rounded-2xl shadow-inner">
+                            <Icon className="w-8 h-8" />
                         </div>
-                        <span className="text-sm font-bold tracking-widest text-fuchsia-400 uppercase">{question.indexKey} Index</span>
+                        <span className="text-base font-bold tracking-widest text-fuchsia-500 uppercase">{question.indexKey} Index</span>
                     </div>
-                    <h3 className="text-3xl font-bold text-slate-800 mb-8 leading-snug">{question.text}</h3>
+                    
+                    <h3 className="text-4xl md:text-5xl font-bold text-slate-800 mb-12 leading-tight text-center">{question.text}</h3>
+
                     {question.type === 'options' ? (
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-2xl mx-auto">
                             {question.options.map((opt) => (
-                                <button key={opt.label} onClick={() => onAnswer(question.id, opt.value)}
-                                    className={`option-btn py-6 px-4 rounded-2xl text-xl font-medium border-2 flex items-center justify-center text-center h-full ${answer === opt.value ? 'active' : 'border-transparent bg-white/50 text-gray-500 hover:bg-white hover:border-purple-100'}`}>
+                                <button
+                                    key={opt.label}
+                                    onClick={() => onAnswer(question.id, opt.value)}
+                                    className={`option-btn py-6 px-6 rounded-2xl text-2xl font-medium border-2 flex items-center justify-center text-center w-full ${
+                                        answer === opt.value 
+                                        ? 'active' 
+                                        : 'border-transparent bg-white/60 text-gray-500 hover:bg-white hover:border-purple-100'
+                                    }`}
+                                >
                                     {opt.label}
                                 </button>
                             ))}
                         </div>
                     ) : (
-                        <div className="px-4 py-6">
-                            <div className="flex justify-between text-base font-bold text-gray-400 mb-6 uppercase tracking-wider">
+                        <div className="px-6 py-8 w-full max-w-2xl mx-auto">
+                            <div className="flex justify-between text-lg font-bold text-gray-400 mb-8 uppercase tracking-wider">
                                 <span>{question.minLabel}</span>
                                 <span>{question.maxLabel}</span>
                             </div>
-                            <input type="range" min="1" max="10" value={answer || 5} onChange={(e) => onAnswer(question.id, parseInt(e.target.value))}
-                                style={{ color: sliderColor, background: `linear-gradient(90deg, ${sliderColor} 0%, ${sliderColor} ${(answer||5)*10}%, #e2e8f0 ${(answer||5)*10}%)` }} />
-                            <div className="text-center mt-6 text-5xl font-bold transition-colors duration-300" style={{ color: sliderColor }}>{answer || 5}</div>
+                            <input 
+                                type="range" min="1" max="10" 
+                                value={answer || 5} 
+                                onChange={(e) => onAnswer(question.id, parseInt(e.target.value))}
+                                style={{ color: sliderColor, background: `linear-gradient(90deg, ${sliderColor} 0%, ${sliderColor} ${(answer||5)*10}%, #e2e8f0 ${(answer||5)*10}%)` }}
+                            />
+                            <div className="text-center mt-10 text-6xl font-bold transition-colors duration-300" style={{ color: sliderColor }}>
+                                {answer || 5}
+                            </div>
                         </div>
                     )}
                 </div>
@@ -215,7 +231,9 @@
             const [answers, setAnswers] = useState({});
             const [result, setResult] = useState(null);
             const [finalScores, setFinalScores] = useState(null);
-            const totalPages = Math.ceil(QUESTIONS_DB.length / 2); 
+
+            // One question per page
+            const totalQuestions = QUESTIONS_DB.length;
 
             const handleAnswer = (qId, val) => {
                 setAnswers(prev => ({ ...prev, [qId]: val }));
@@ -232,14 +250,13 @@
                     }
                 });
 
-                // Average scores
                 Object.keys(scores).forEach(k => {
                     if (counts[k] > 0) scores[k] = Math.round(scores[k] / counts[k]);
                 });
 
                 setFinalScores(scores);
 
-                // --- NEW LOGIC: PRIORITIZE DOMINANT NEED ---
+                // --- PRIORITY LOGIC ---
                 const entries = Object.entries(scores);
                 entries.sort((a, b) => b[1] - a[1]); // Sort by highest score first
                 const dominantIndex = entries[0][0];
@@ -247,12 +264,9 @@
 
                 let match = null;
 
-                // Rule 1: If Dominant Score is High (>6), force pick from that category
+                // Rule 1: High Dominant Score (>6)
                 if (dominantScore > 6) {
-                    // Filter fragrances that match this dominant need
                     let candidates = FRAGRANCE_DB.filter(f => f.primaryNeed === dominantIndex);
-                    
-                    // If candidates found, sort by distance to other scores to find best fit
                     if (candidates.length > 0) {
                         const scoredCandidates = candidates.map(f => {
                             let diff = 0;
@@ -264,13 +278,12 @@
                     }
                 }
 
-                // Rule 2: If no match found yet (e.g., scores are balanced/low), use distance method
+                // Rule 2: Fallback
                 if (!match) {
                     const isBalanced = entries.every(([k, v]) => v >= 4 && v <= 6);
                     if (isBalanced) {
                         match = FRAGRANCE_DB.find(f => f.name === "Balanced Everyday");
                     } else {
-                        // Standard distance fallback
                         const scored = FRAGRANCE_DB.map(f => {
                             let diff = 0;
                             Object.keys(scores).forEach(k => diff += Math.abs(scores[k] - f.triggers[k]));
@@ -282,20 +295,19 @@
                 }
 
                 setResult(match);
-                setStep(totalPages + 1);
+                setStep(totalQuestions + 1);
             };
 
-            const currentQuestions = useMemo(() => {
-                if (step === 0 || step > totalPages) return [];
-                const startIndex = (step - 1) * 2;
-                return QUESTIONS_DB.slice(startIndex, startIndex + 2);
+            const currentQuestion = useMemo(() => {
+                if (step === 0 || step > totalQuestions) return null;
+                return QUESTIONS_DB[step - 1];
             }, [step]);
 
-            const canProceed = currentQuestions.every(q => answers[q.id] !== undefined);
+            const canProceed = currentQuestion ? answers[currentQuestion.id] !== undefined : false;
 
             return (
                 <div className="h-screen w-full flex flex-col overflow-hidden bg-fuchsia-50">
-                    {step > 0 && step <= totalPages && <ProgressBar current={step} total={totalPages} />}
+                    {step > 0 && step <= totalQuestions && <ProgressBar current={step} total={totalQuestions} />}
 
                     {/* INTRO */}
                     {step === 0 && (
@@ -314,19 +326,36 @@
                         </div>
                     )}
 
-                    {/* QUESTIONS */}
-                    {step > 0 && step <= totalPages && (
-                        <div className="h-full w-full overflow-y-auto relative">
+                    {/* QUESTIONS (Single Question Mode) */}
+                    {step > 0 && step <= totalQuestions && currentQuestion && (
+                        <div className="h-full w-full flex flex-col items-center justify-center relative p-6">
                             <div className="absolute inset-0 bg-gradient-to-br from-purple-50 via-pink-50 to-white -z-10"></div>
-                            <div className="max-w-3xl mx-auto w-full p-6 pt-16 pb-32 animate-fade-in">
-                                {currentQuestions.map(q => (
-                                    <QuestionCard key={q.id} question={q} answer={answers[q.id]} onAnswer={handleAnswer} />
-                                ))}
-                                <div className="fixed bottom-0 left-0 w-full bg-white/80 backdrop-blur-lg border-t border-white/60 p-4 flex justify-center items-center gap-6 z-40 shadow-lg">
-                                    <button onClick={() => setStep(s => s - 1)} className="text-gray-400 font-bold hover:text-slate-800 px-6 py-3 transition-colors">Back</button>
-                                    <button onClick={() => step === totalPages ? calculateResult() : setStep(s => s + 1)} disabled={!canProceed}
-                                        className={`px-12 py-4 rounded-full font-bold text-xl shadow-xl transition-all flex items-center gap-3 ${canProceed ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:scale-105 hover:shadow-purple-300' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}>
-                                        {step === totalPages ? "Reveal Match" : "Next Question"} <Icons.ArrowRight className="w-6 h-6" />
+                            
+                            <div className="max-w-4xl w-full flex flex-col items-center">
+                                <QuestionCard 
+                                    key={currentQuestion.id} 
+                                    question={currentQuestion} 
+                                    answer={answers[currentQuestion.id]} 
+                                    onAnswer={handleAnswer} 
+                                />
+                                
+                                <div className="w-full flex justify-between items-center mt-8 max-w-4xl">
+                                    <button 
+                                        onClick={() => setStep(s => s - 1)} 
+                                        className="text-gray-400 font-bold hover:text-slate-800 px-8 py-4 text-lg transition-colors bg-white/50 rounded-full"
+                                    >
+                                        Back
+                                    </button>
+                                    <button 
+                                        onClick={() => step === totalQuestions ? calculateResult() : setStep(s => s + 1)}
+                                        disabled={!canProceed}
+                                        className={`px-16 py-5 rounded-full font-bold text-2xl shadow-xl transition-all flex items-center gap-3 ${
+                                            canProceed 
+                                            ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:scale-105 hover:shadow-purple-300' 
+                                            : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                        }`}
+                                    >
+                                        {step === totalQuestions ? "Reveal Match" : "Next"} <Icons.ArrowRight className="w-6 h-6" />
                                     </button>
                                 </div>
                             </div>
@@ -334,7 +363,7 @@
                     )}
 
                     {/* RESULT */}
-                    {step > totalPages && result && (
+                    {step > totalQuestions && result && (
                         <div className="h-full w-full flex flex-col md:flex-row overflow-hidden animate-fade-in bg-white">
                             <div className="md:w-5/12 h-[40vh] md:h-full relative overflow-hidden flex items-center justify-center bg-slate-900 group">
                                 <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-900 via-purple-900 to-indigo-900"></div>
