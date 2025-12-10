@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fragrance Finder</title>
+    <title>Scent Soul - Fragrance Finder</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- React & ReactDOM -->
@@ -11,452 +11,392 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <!-- Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        body {
-            font-family: 'Outfit', sans-serif;
+        body { font-family: 'Outfit', sans-serif; }
+        h1, h2, h3, .serif-font { font-family: 'Playfair Display', serif; }
+
+        /* Smooth Fade In */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+
+        /* SASSY GRADIENT BACKGROUND */
+        .sassy-bg {
+            background: linear-gradient(120deg, #fdf4ff 0%, #fae8ff 25%, #f0abfc 50%, #e879f9 75%, #d946ef 100%);
+            background-size: 200% 200%;
+            animation: gradientBG 15s ease infinite;
+        }
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
-        /* Custom Animations */
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-            100% { transform: translateY(0px); }
+        /* Floating Blobs */
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.6;
+            animation: floatBlob 10s infinite alternate;
+            z-index: 0;
         }
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(20px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-        @keyframes popIn {
-            0% { opacity: 0; transform: scale(0.9); }
-            100% { opacity: 1; transform: scale(1); }
+        @keyframes floatBlob {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(20px, -20px) scale(1.1); }
         }
 
-        .animate-float { animation: float 6s ease-in-out infinite; }
-        .animate-float-delayed { animation: float 6s ease-in-out infinite 3s; }
-        .animate-slide-in { animation: slideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .animate-pop-in { animation: popIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f3f4f6; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #c084fc; border-radius: 10px; }
 
-        /* --- NEW COOL SLIDER STYLING --- */
-        input[type=range] {
+        /* Range Slider Styling */
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; cursor: pointer; }
+        input[type=range]::-webkit-slider-thumb { 
             -webkit-appearance: none; 
-            width: 100%; 
-            background: transparent; 
-            height: 12px;
-            border-radius: 999px;
-            cursor: pointer;
-            /* Focus outline remove */
-            outline: none;
+            height: 32px; 
+            width: 32px; 
+            border-radius: 50%; 
+            background: #fff; 
+            border: 6px solid currentColor; 
+            margin-top: -12px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15); 
+            transition: transform 0.1s; 
         }
+        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; border-radius: 999px; }
         
-        /* Thumb (The Circle) */
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 32px;
-            width: 32px;
-            border-radius: 50%;
-            background: #ffffff;
-            /* Uses the 'color' property set in React for dynamic border color */
-            border: 4px solid currentColor; 
-            margin-top: -10px; 
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            transition: transform 0.1s, border-color 0.3s ease;
+        /* Option Button */
+        .option-btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
-        input[type=range]::-webkit-slider-thumb:hover {
-            transform: scale(1.15);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        .option-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px -4px rgba(147, 51, 234, 0.15);
         }
-
-        /* Track (The Line) - Styling handled in React inline styles for dynamic fill */
-        input[type=range]::-webkit-slider-runnable-track {
-            width: 100%;
-            height: 12px;
-            border-radius: 999px;
-        }
-
-        /* Firefox Support */
-        input[type=range]::-moz-range-thumb {
-            height: 32px;
-            width: 32px;
-            border-radius: 50%;
-            background: #ffffff;
-            border: 4px solid currentColor;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            transition: transform 0.1s;
-        }
-
-        /* Glassmorphism Card */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
+        .option-btn.active {
+            background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+            border-color: #9333ea;
+            color: #6b21a8;
+            box-shadow: 0 4px 12px -2px rgba(147, 51, 234, 0.3);
         }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen overflow-x-hidden relative">
-    
-    <!-- Animated Background Blobs -->
-    <div class="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
-        <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float"></div>
-        <div class="absolute top-[20%] right-[-5%] w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float-delayed"></div>
-        <div class="absolute bottom-[-10%] left-[20%] w-80 h-80 bg-indigo-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float"></div>
-    </div>
+<body class="sassy-bg h-screen overflow-hidden text-slate-800 relative">
 
-    <div id="root"></div>
+    <!-- Background Blobs -->
+    <div class="blob bg-purple-300 w-96 h-96 top-[-10%] left-[-10%] mix-blend-multiply"></div>
+    <div class="blob bg-pink-300 w-96 h-96 top-[20%] right-[-10%] mix-blend-multiply" style="animation-delay: 2s"></div>
+    <div class="blob bg-indigo-300 w-80 h-80 bottom-[-10%] left-[20%] mix-blend-multiply" style="animation-delay: 4s"></div>
+
+    <div id="root" class="h-full relative z-10"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useMemo } = React;
 
         // --- ICONS ---
-        const Wind = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/></svg>;
-        const Zap = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>;
-        const Brain = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>;
-        const Trees = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 10v.2A3 3 0 0 1 8.9 16v0H5v0h0a3 3 0 0 1-1-5.8V10a3 3 0 0 1 5.3-2.1"/><path d="M7 16v6"/><path d="M13 19v3"/><path d="M12 19h8.3a1 1 0 0 0 .7-1.7L18 14h.3a1 1 0 0 0 .7-1.7L16 9h.2a1 1 0 0 0 .6-1.7L13 2.6a1 1 0 0 0-1.7 0L8.3 7.3a1 1 0 0 0 .6 1.7H9.1a1 1 0 0 0 .7 1.7L7 14h.4a1 1 0 0 0 .7 1.7L11 19z"/></svg>;
-        const Heart = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>;
-        const RefreshCw = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>;
-        const ArrowRight = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>;
-        const Sparkles = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M9 3v4"/><path d="M3 5h4"/><path d="M3 9h4"/></svg>;
-        const Activity = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>;
+        const Icons = {
+            Wind: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/></svg>,
+            Zap: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
+            Brain: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>,
+            Trees: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 10v.2A3 3 0 0 1 8.9 16v0H5v0h0a3 3 0 0 1-1-5.8V10a3 3 0 0 1 5.3-2.1"/><path d="M7 16v6"/><path d="M13 19v3"/><path d="M12 19h8.3a1 1 0 0 0 .7-1.7L18 14h.3a1 1 0 0 0 .7-1.7L16 9h.2a1 1 0 0 0 .6-1.7L13 2.6a1 1 0 0 0-1.7 0L8.3 7.3a1 1 0 0 0 .6 1.7H9.1a1 1 0 0 0 .7 1.7L7 14h.4a1 1 0 0 0 .7 1.7L11 19z"/></svg>,
+            Heart: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>,
+            Sparkles: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M9 3v4"/><path d="M3 5h4"/><path d="M3 9h4"/></svg>,
+            Activity: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>,
+            RefreshCw: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>,
+            ArrowRight: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>,
+            Sun: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+        };
 
-        // --- DATA ---
+        // --- DATABASE ---
+        // triggers: Scores represent the "Ideal User State" for this fragrance.
         const FRAGRANCE_DB = [
-            { id: 1, name: "Tranquil Sleep", primaryNeed: "SI", secondaryNeed: "EI", triggers: { SI: 9, EI: 2, FI: 0, EnI: 0, SEI: 5 }, description: "Deep relaxation for poor sleep and high stress.", moods: ["Relaxation", "Anxiety Relief", "Insomnia Aid"], iconComponent: Wind },
-            { id: 2, name: "Morning Vitality", primaryNeed: "EI", secondaryNeed: "SI", triggers: { SI: 3, EI: 9, FI: 5, EnI: 0, SEI: 0 }, description: "Gentle awakening for morning fatigue and low energy.", moods: ["Gentle Awakening", "Mood Uplift", "Energy Boost"], iconComponent: Zap },
-            { id: 3, name: "Focus Flow", primaryNeed: "FI", secondaryNeed: "SI", triggers: { SI: 5, EI: 5, FI: 9, EnI: 0, SEI: 0 }, description: "Enhances concentration and mental clarity for desk work.", moods: ["High Focus", "Mental Clarity", "Concentration"], iconComponent: Brain },
-            { id: 4, name: "Emotional Balance", primaryNeed: "SEI", secondaryNeed: "SI", triggers: { SI: 6, EI: 5, FI: 0, EnI: 0, SEI: 9 }, description: "Grounding and stability for emotional swings.", moods: ["Inner Stability", "Grounding", "Calm"], iconComponent: Heart },
-            { id: 5, name: "Calm Confidence", primaryNeed: "SI", secondaryNeed: "FI", triggers: { SI: 8, EI: 6, FI: 7, EnI: 0, SEI: 4 }, description: "Boosts presence and reduces anxiety during high interaction.", moods: ["Confidence", "Presence", "Networking"], iconComponent: Sparkles },
-            { id: 6, name: "Digital Detox", primaryNeed: "EnI", secondaryNeed: "SI", triggers: { SI: 6, EI: 4, FI: 0, EnI: 9, SEI: 5 }, description: "Eye relief and sensory relaxation for high screen users.", moods: ["Eye Relief", "Senses Relaxation", "Unplugging"], iconComponent: Activity },
-            { id: 7, name: "Urban Shield", primaryNeed: "EnI", secondaryNeed: "EI", triggers: { SI: 5, EI: 5, FI: 0, EnI: 10, SEI: 2 }, description: "Refreshing and cleansing against harsh environments.", moods: ["Refreshing", "Cleansing", "Protection"], iconComponent: Trees },
-            { id: 8, name: "Meditative Stillness", primaryNeed: "SI", secondaryNeed: "SEI", triggers: { SI: 8, EI: 3, FI: 6, EnI: 0, SEI: 7 }, description: "Deep calm for introspection and mindfulness.", moods: ["Deep Calm", "Introspection", "Mindfulness"], iconComponent: Wind },
-            { id: 9, name: "Fresh Optimism", primaryNeed: "EI", secondaryNeed: "SEI", triggers: { SI: 4, EI: 8, FI: 0, EnI: 0, SEI: 7 }, description: "Uplifts low mood and emotional flatness.", moods: ["Emotional Uplift", "Motivation", "Joy"], iconComponent: Zap },
-            { id: 10, name: "Warm Comfort", primaryNeed: "SEI", secondaryNeed: "SI", triggers: { SI: 7, EI: 2, FI: 0, EnI: 0, SEI: 10 }, description: "Safe, nurturing relaxation for emotional fatigue.", moods: ["Security", "Nurturing", "Relaxation"], iconComponent: Heart },
-            { id: 11, name: "Creative Spark", primaryNeed: "FI", secondaryNeed: "EI", triggers: { SI: 2, EI: 7, FI: 10, EnI: 0, SEI: 6 }, description: "Unlocks imagination and flows through creative blocks.", moods: ["Inspiration", "Imagination Flow", "Creativity"], iconComponent: Brain },
-            { id: 12, name: "Balanced Everyday", primaryNeed: "BAL", secondaryNeed: "BAL", triggers: { SI: 5, EI: 5, FI: 5, EnI: 5, SEI: 5 }, description: "A neutral, stable fragrance for general lifestyle.", moods: ["Stability", "Neutral", "Daily Wear"], iconComponent: RefreshCw }
+            { id: 1, name: "Tranquil Sleep", primaryNeed: "SI", secondaryNeed: "SEI", triggers: { SI: 9, EI: 2, FI: 0, EnI: 0, SEI: 8 }, description: "Deep relaxation for poor sleep and high stress.", moods: ["Relaxation", "Anxiety Relief", "Insomnia Aid"], iconComponent: Icons.Wind, image: "https://images.unsplash.com/photo-1519681393798-38e363ba115e?auto=format&fit=crop&w=800&q=80" },
+            { id: 2, name: "Morning Vitality", primaryNeed: "EI", secondaryNeed: "SI", triggers: { SI: 3, EI: 9, FI: 5, EnI: 0, SEI: 0 }, description: "Gentle awakening for morning fatigue and low energy.", moods: ["Gentle Awakening", "Mood Uplift", "Energy Boost"], iconComponent: Icons.Zap, image: "https://images.unsplash.com/photo-1620916297397-a4a5402a3c6c?auto=format&fit=crop&w=800&q=80" },
+            { id: 3, name: "Focus Flow", primaryNeed: "FI", secondaryNeed: "SI", triggers: { SI: 5, EI: 5, FI: 9, EnI: 0, SEI: 0 }, description: "Enhances concentration and mental clarity for desk work.", moods: ["High Focus", "Mental Clarity", "Concentration"], iconComponent: Icons.Brain, image: "https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=800&q=80" },
+            { id: 4, name: "Emotional Balance", primaryNeed: "SEI", secondaryNeed: "SI", triggers: { SI: 6, EI: 5, FI: 0, EnI: 0, SEI: 9 }, description: "Grounding and stability for emotional swings.", moods: ["Inner Stability", "Grounding", "Calm"], iconComponent: Icons.Heart, image: "https://images.unsplash.com/photo-1545241047-6083a3684587?auto=format&fit=crop&w=800&q=80" },
+            { id: 5, name: "Calm Confidence", primaryNeed: "SI", secondaryNeed: "FI", triggers: { SI: 8, EI: 6, FI: 7, EnI: 0, SEI: 4 }, description: "Boosts presence and reduces anxiety during high interaction.", moods: ["Confidence", "Presence", "Networking"], iconComponent: Icons.Sparkles, image: "https://images.unsplash.com/photo-1595341388084-77a8f77732dc?auto=format&fit=crop&w=800&q=80" },
+            { id: 6, name: "Digital Detox", primaryNeed: "EnI", secondaryNeed: "SI", triggers: { SI: 6, EI: 4, FI: 0, EnI: 9, SEI: 5 }, description: "Eye relief and sensory relaxation for high screen users.", moods: ["Eye Relief", "Senses Relaxation", "Unplugging"], iconComponent: Icons.Activity, image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=800&q=80" },
+            { id: 7, name: "Urban Shield", primaryNeed: "EnI", secondaryNeed: "EI", triggers: { SI: 5, EI: 5, FI: 0, EnI: 10, SEI: 2 }, description: "Refreshing and cleansing against harsh environments.", moods: ["Refreshing", "Cleansing", "Protection"], iconComponent: Icons.Trees, image: "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=800&q=80" },
+            { id: 8, name: "Meditative Stillness", primaryNeed: "SI", secondaryNeed: "SEI", triggers: { SI: 8, EI: 3, FI: 6, EnI: 0, SEI: 7 }, description: "Deep calm for introspection and mindfulness.", moods: ["Deep Calm", "Introspection", "Mindfulness"], iconComponent: Icons.Wind, image: "https://images.unsplash.com/photo-1528319725582-ddc096101511?auto=format&fit=crop&w=800&q=80" },
+            { id: 9, name: "Fresh Optimism", primaryNeed: "EI", secondaryNeed: "SEI", triggers: { SI: 4, EI: 8, FI: 0, EnI: 0, SEI: 7 }, description: "Uplifts low mood and emotional flatness.", moods: ["Emotional Uplift", "Motivation", "Joy"], iconComponent: Icons.Zap, image: "https://images.unsplash.com/photo-1470770903676-69b98201ea1c?auto=format&fit=crop&w=800&q=80" },
+            { id: 10, name: "Warm Comfort", primaryNeed: "SEI", secondaryNeed: "SI", triggers: { SI: 7, EI: 2, FI: 0, EnI: 0, SEI: 10 }, description: "Safe, nurturing relaxation for emotional fatigue.", moods: ["Security", "Nurturing", "Relaxation"], iconComponent: Icons.Heart, image: "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=800&q=80" },
+            { id: 11, name: "Creative Spark", primaryNeed: "FI", secondaryNeed: "EI", triggers: { SI: 2, EI: 7, FI: 10, EnI: 0, SEI: 6 }, description: "Unlocks imagination and flows through creative blocks.", moods: ["Inspiration", "Imagination Flow", "Creativity"], iconComponent: Icons.Brain, image: "https://images.unsplash.com/photo-1501472312651-726afe119ff1?auto=format&fit=crop&w=800&q=80" },
+            { id: 12, name: "Balanced Everyday", primaryNeed: "BAL", secondaryNeed: "BAL", triggers: { SI: 5, EI: 5, FI: 5, EnI: 5, SEI: 5 }, description: "A neutral, stable fragrance for general lifestyle.", moods: ["Stability", "Neutral", "Daily Wear"], iconComponent: Icons.RefreshCw, image: "https://images.unsplash.com/photo-1594035910387-fea477942698?auto=format&fit=crop&w=800&q=80" }
         ];
 
-        const INDEX_FULL_NAMES = {
-            SI: "Stress Index",
-            EI: "Energy Index",
-            FI: "Focus Index",
-            EnI: "Environment Index",
-            SEI: "Sensitivity Index",
-            BAL: "General Lifestyle Balance"
-        };
+        const INDEX_FULL_NAMES = { SI: "Stress", EI: "Energy", FI: "Focus", EnI: "Environment", SEI: "Sensitivity", BAL: "Balance" };
+
+        const QUESTIONS_DB = [
+            // STRESS (SI)
+            { id: "si1", indexKey: "SI", icon: Icons.Wind, text: "How frequently do you feel mentally overwhelmed?", type: "options", options: [{ label: "Rarely", value: 1 }, { label: "Occasionally", value: 4 }, { label: "Often", value: 7 }, { label: "Daily", value: 10 }] },
+            { id: "si2", indexKey: "SI", icon: Icons.Wind, text: "At day's end, describe your state of mind:", type: "options", options: [{ label: "Calm", value: 2 }, { label: "Tense", value: 5 }, { label: "Exhausted", value: 8 }, { label: "Anxious", value: 10 }] },
+            { id: "si3", indexKey: "SI", icon: Icons.Wind, text: "How many hours do you usually sleep?", type: "options", options: [{ label: "8+ Hours", value: 1 }, { label: "6-7 Hours", value: 4 }, { label: "5-6 Hours", value: 7 }, { label: "< 5 Hours", value: 10 }] },
+            { id: "si4", indexKey: "SI", icon: Icons.Wind, text: "Rate your mental noise level (1-10)", type: "slider", minLabel: "Silent", maxLabel: "Chaos" },
+            
+            // ENERGY (EI)
+            { id: "ei1", indexKey: "EI", icon: Icons.Zap, text: "How energized do you feel usually?", type: "options", options: [{ label: "Very High", value: 1 }, { label: "Moderate", value: 4 }, { label: "Low", value: 7 }, { label: "Drained", value: 10 }] },
+            { id: "ei2", indexKey: "EI", icon: Icons.Zap, text: "Your physical activity level?", type: "options", options: [{ label: "High", value: 1 }, { label: "Moderate", value: 4 }, { label: "Light", value: 7 }, { label: "Sedentary", value: 10 }] },
+            { id: "ei3", indexKey: "EI", icon: Icons.Zap, text: "Caffeine consumption per day?", type: "options", options: [{ label: "None", value: 1 }, { label: "1-2 Cups", value: 4 }, { label: "3-4 Cups", value: 7 }, { label: "4+ Cups", value: 10 }] },
+            { id: "ei4", indexKey: "EI", icon: Icons.Zap, text: "Rate your physical fatigue (1-10)", type: "slider", minLabel: "Active", maxLabel: "Drained" },
+
+            // FOCUS (FI)
+            { id: "fi1", indexKey: "FI", icon: Icons.Brain, text: "Distraction level while working?", type: "options", options: [{ label: "Focused", value: 1 }, { label: "Moderate", value: 5 }, { label: "Easy", value: 8 }, { label: "Very Easy", value: 10 }] },
+            { id: "fi2", indexKey: "FI", icon: Icons.Brain, text: "Daily screen exposure:", type: "options", options: [{ label: "<3 Hours", value: 2 }, { label: "3-6 Hours", value: 5 }, { label: "6-10 Hrs", value: 8 }, { label: "10+ Hrs", value: 10 }] },
+            { id: "fi3", indexKey: "FI", icon: Icons.Brain, text: "Work social interaction level?", type: "options", options: [{ label: "Very High", value: 8 }, { label: "Moderate", value: 5 }, { label: "Low", value: 4 }, { label: "Isolated", value: 10 }] },
+            { id: "fi4", indexKey: "FI", icon: Icons.Brain, text: "Nature of mental workload?", type: "options", options: [{ label: "Relaxed", value: 1 }, { label: "Steady", value: 4 }, { label: "Demanding", value: 7 }, { label: "Intense", value: 10 }] },
+
+            // ENVIRONMENT (EnI)
+            { id: "eni1", indexKey: "EnI", icon: Icons.Trees, text: "Primary work environment?", type: "options", options: [{ label: "Indoor AC", value: 2 }, { label: "Home", value: 4 }, { label: "Mixed", value: 7 }, { label: "Outdoor", value: 10 }] },
+            { id: "eni2", indexKey: "EnI", icon: Icons.Trees, text: "City pollution exposure (1-10)", type: "slider", minLabel: "Low", maxLabel: "High" },
+            { id: "eni3", indexKey: "EnI", icon: Icons.Sun, text: "What is your city's weather like?", type: "options", options: [{ label: "Pleasant", value: 3 }, { label: "Cold", value: 5 }, { label: "Hot", value: 8 }, { label: "Variable", value: 10 }] },
+            { id: "eni4", indexKey: "EnI", icon: Icons.Trees, text: "City type you live in?", type: "options", options: [{ label: "Rural", value: 2 }, { label: "Town", value: 5 }, { label: "City", value: 8 }, { label: "Metro", value: 10 }] },
+
+            // SENSITIVITY (SEI)
+            { id: "sei1", indexKey: "SEI", icon: Icons.Heart, text: "Personality type?", type: "options", options: [{ label: "Calm", value: 2 }, { label: "Balanced", value: 5 }, { label: "Expressive", value: 7 }, { label: "Intense", value: 10 }] },
+            { id: "sei2", indexKey: "SEI", icon: Icons.Heart, text: "Reaction to strong scents?", type: "options", options: [{ label: "Love it", value: 1 }, { label: "Okay", value: 4 }, { label: "Prefer Mild", value: 7 }, { label: "Hate it", value: 10 }] },
+            { id: "sei3", indexKey: "SEI", icon: Icons.Heart, text: "Preferred scent vibe?", type: "options", options: [{ label: "Fresh", value: 2 }, { label: "Warm", value: 5 }, { label: "Earthy", value: 7 }, { label: "Bold", value: 10 }] },
+            { id: "sei4", indexKey: "SEI", icon: Icons.Heart, text: "Emotional sensitivity today (1-10)", type: "slider", minLabel: "Resilient", maxLabel: "Sensitive" }
+        ];
 
         // --- COMPONENTS ---
-        
-        const ProgressBar = ({ step, totalSteps }) => {
-            const percentage = Math.min(100, (step / totalSteps) * 100);
-            return (
-                <div className="w-full bg-gray-200 h-2 fixed top-0 left-0 z-50">
-                    <div 
-                        className="bg-purple-600 h-2 transition-all duration-500 ease-out" 
-                        style={{ width: `${percentage}%` }}
-                    ></div>
-                </div>
-            );
-        };
+        const ProgressBar = ({ current, total }) => (
+            <div className="w-full bg-white/50 h-2 fixed top-0 left-0 z-50">
+                <div className="bg-gradient-to-r from-purple-500 to-pink-500 h-full transition-all duration-700 ease-out shadow-[0_0_15px_rgba(236,72,153,0.5)]" style={{ width: `${(current / total) * 100}%` }}></div>
+            </div>
+        );
 
-        const QuestionCard = ({ title, description, indexKey, icon: Icon, nextStep, prevStep, isLast, value, onChange }) => {
-            
-            // --- DYNAMIC COLOR LOGIC ---
-            const getTheme = (val) => {
-                if (val <= 3) return { 
-                    color: '#22d3ee', // Cyan-400 (Cool/Low)
-                    label: 'Low',
-                    bgGradient: `linear-gradient(90deg, #22d3ee 0%, #22d3ee ${val*10}%, #e2e8f0 ${val*10}%, #e2e8f0 100%)`
-                };
-                if (val <= 7) return { 
-                    color: '#a855f7', // Purple-500 (Mid)
-                    label: 'Moderate',
-                    bgGradient: `linear-gradient(90deg, #a855f7 0%, #a855f7 ${val*10}%, #e2e8f0 ${val*10}%, #e2e8f0 100%)`
-                };
-                return { 
-                    color: '#f43f5e', // Rose-500 (High)
-                    label: 'High',
-                    bgGradient: `linear-gradient(90deg, #f43f5e 0%, #f43f5e ${val*10}%, #e2e8f0 ${val*10}%, #e2e8f0 100%)`
-                };
-            };
-
-            const theme = getTheme(value);
+        const QuestionCard = ({ question, answer, onAnswer }) => {
+            const Icon = question.icon;
+            const sliderColor = answer > 7 ? '#db2777' : answer > 4 ? '#9333ea' : '#4f46e5';
 
             return (
-                <div className="glass-card p-6 md:p-10 rounded-3xl shadow-2xl w-full max-w-lg mx-auto animate-pop-in border-t-4" style={{ borderColor: theme.color }}>
-                    <div className="flex flex-col items-center mb-6">
-                        <div className="p-4 rounded-full mb-4 shadow-inner transition-colors duration-300" style={{ backgroundColor: `${theme.color}20`, color: theme.color }}>
-                            <Icon className="w-10 h-10" />
+                <div className="bg-white/80 backdrop-blur-xl p-8 md:p-10 rounded-3xl shadow-lg border border-white/60 mb-8 transition-all hover:shadow-2xl hover:scale-[1.01] animate-fade-in group">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="p-3 bg-fuchsia-50 text-fuchsia-600 rounded-2xl shadow-inner group-hover:bg-fuchsia-100 transition-colors">
+                            <Icon className="w-6 h-6" />
                         </div>
-                        <h2 className="text-sm font-bold uppercase tracking-widest mb-1 transition-colors duration-300" style={{ color: theme.color }}>{indexKey} Assessment</h2>
-                        <h3 className="text-3xl font-bold text-gray-800 text-center leading-tight">{title}</h3>
+                        <span className="text-sm font-bold tracking-widest text-fuchsia-400 uppercase">{question.indexKey} Index</span>
                     </div>
-                    
-                    <p className="text-gray-500 text-center mb-10 text-lg leading-relaxed">{description}</p>
-
-                    <div className="mb-10 px-2">
-                        <div className="flex justify-between text-xs font-bold text-gray-400 uppercase tracking-wide mb-4">
-                            <span>Low</span>
-                            <span>Moderate</span>
-                            <span>High</span>
+                    <h3 className="text-3xl font-bold text-slate-800 mb-8 leading-snug">{question.text}</h3>
+                    {question.type === 'options' ? (
+                        <div className="grid grid-cols-2 gap-4">
+                            {question.options.map((opt) => (
+                                <button key={opt.label} onClick={() => onAnswer(question.id, opt.value)}
+                                    className={`option-btn py-6 px-4 rounded-2xl text-xl font-medium border-2 flex items-center justify-center text-center h-full ${answer === opt.value ? 'active' : 'border-transparent bg-white/50 text-gray-500 hover:bg-white hover:border-purple-100'}`}>
+                                    {opt.label}
+                                </button>
+                            ))}
                         </div>
-                        
-                        <div className="relative group">
-                            <input 
-                                type="range" 
-                                min="0" 
-                                max="10" 
-                                value={value} 
-                                onChange={(e) => onChange(e.target.value)}
-                                style={{ 
-                                    background: theme.bgGradient,
-                                    color: theme.color /* Passes color to thumb border via currentColor */
-                                }}
-                            />
-                        </div>
-                        
-                        <div className="mt-8 text-center transition-all duration-300 transform" key={value}>
-                            <div className="text-6xl font-extrabold transition-colors duration-300" style={{ color: theme.color }}>
-                                {value}
+                    ) : (
+                        <div className="px-4 py-6">
+                            <div className="flex justify-between text-base font-bold text-gray-400 mb-6 uppercase tracking-wider">
+                                <span>{question.minLabel}</span>
+                                <span>{question.maxLabel}</span>
                             </div>
-                            <div className="text-sm font-bold uppercase tracking-widest mt-1 opacity-60" style={{ color: theme.color }}>
-                                {theme.label} Intensity
-                            </div>
+                            <input type="range" min="1" max="10" value={answer || 5} onChange={(e) => onAnswer(question.id, parseInt(e.target.value))}
+                                style={{ color: sliderColor, background: `linear-gradient(90deg, ${sliderColor} 0%, ${sliderColor} ${(answer||5)*10}%, #e2e8f0 ${(answer||5)*10}%)` }} />
+                            <div className="text-center mt-6 text-5xl font-bold transition-colors duration-300" style={{ color: sliderColor }}>{answer || 5}</div>
                         </div>
-                    </div>
-
-                    <div className="flex justify-between items-center gap-4">
-                        <button 
-                            onClick={prevStep} 
-                            className="px-6 py-3 rounded-xl font-semibold text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-all"
-                        >
-                            Back
-                        </button>
-                        <button 
-                            onClick={nextStep} 
-                            className="flex-1 text-white px-8 py-3 rounded-xl font-bold text-lg shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
-                            style={{ backgroundColor: theme.color, boxShadow: `0 10px 20px -10px ${theme.color}` }}
-                        >
-                            {isLast ? "Reveal Match" : "Next"} <ArrowRight className="w-5 h-5" />
-                        </button>
-                    </div>
+                    )}
                 </div>
             );
         };
 
         // --- MAIN APP ---
-        function FragranceSurvey() {
-            const [step, setStep] = useState(0);
-            const [scores, setScores] = useState({ SI: 5, EI: 5, FI: 5, EnI: 5, SEI: 5 });
+        function App() {
+            const [step, setStep] = useState(0); 
+            const [answers, setAnswers] = useState({});
             const [result, setResult] = useState(null);
+            const [finalScores, setFinalScores] = useState(null);
+            const totalPages = Math.ceil(QUESTIONS_DB.length / 2); 
 
-            const handleScoreChange = (indexKey, value) => {
-                setScores(prev => ({ ...prev, [indexKey]: parseInt(value) }));
+            const handleAnswer = (qId, val) => {
+                setAnswers(prev => ({ ...prev, [qId]: val }));
             };
 
             const calculateResult = () => {
-                const entries = Object.entries(scores);
-                entries.sort((a, b) => b[1] - a[1]);
-                
-                const isBalanced = entries.every(([key, val]) => val >= 4 && val <= 6);
-                if (isBalanced) return FRAGRANCE_DB.find(f => f.name === "Balanced Everyday");
+                const scores = { SI: 0, EI: 0, FI: 0, EnI: 0, SEI: 0 };
+                const counts = { SI: 0, EI: 0, FI: 0, EnI: 0, SEI: 0 };
 
-                const scoredFragrances = FRAGRANCE_DB.map(frag => {
-                    let diffScore = 0;
-                    Object.keys(scores).forEach(key => {
-                        diffScore += Math.abs(scores[key] - frag.triggers[key]);
-                    });
-                    return { ...frag, matchScore: diffScore };
+                QUESTIONS_DB.forEach(q => {
+                    if (answers[q.id]) {
+                        scores[q.indexKey] += answers[q.id];
+                        counts[q.indexKey]++;
+                    }
                 });
 
-                scoredFragrances.sort((a, b) => a.matchScore - b.matchScore);
-                return scoredFragrances[0];
+                // Average scores
+                Object.keys(scores).forEach(k => {
+                    if (counts[k] > 0) scores[k] = Math.round(scores[k] / counts[k]);
+                });
+
+                setFinalScores(scores);
+
+                // --- NEW LOGIC: PRIORITIZE DOMINANT NEED ---
+                const entries = Object.entries(scores);
+                entries.sort((a, b) => b[1] - a[1]); // Sort by highest score first
+                const dominantIndex = entries[0][0];
+                const dominantScore = entries[0][1];
+
+                let match = null;
+
+                // Rule 1: If Dominant Score is High (>6), force pick from that category
+                if (dominantScore > 6) {
+                    // Filter fragrances that match this dominant need
+                    let candidates = FRAGRANCE_DB.filter(f => f.primaryNeed === dominantIndex);
+                    
+                    // If candidates found, sort by distance to other scores to find best fit
+                    if (candidates.length > 0) {
+                        const scoredCandidates = candidates.map(f => {
+                            let diff = 0;
+                            Object.keys(scores).forEach(k => diff += Math.abs(scores[k] - f.triggers[k]));
+                            return { ...f, diff };
+                        });
+                        scoredCandidates.sort((a, b) => a.diff - b.diff);
+                        match = scoredCandidates[0];
+                    }
+                }
+
+                // Rule 2: If no match found yet (e.g., scores are balanced/low), use distance method
+                if (!match) {
+                    const isBalanced = entries.every(([k, v]) => v >= 4 && v <= 6);
+                    if (isBalanced) {
+                        match = FRAGRANCE_DB.find(f => f.name === "Balanced Everyday");
+                    } else {
+                        // Standard distance fallback
+                        const scored = FRAGRANCE_DB.map(f => {
+                            let diff = 0;
+                            Object.keys(scores).forEach(k => diff += Math.abs(scores[k] - f.triggers[k]));
+                            return { ...f, diff };
+                        });
+                        scored.sort((a, b) => a.diff - b.diff);
+                        match = scored[0];
+                    }
+                }
+
+                setResult(match);
+                setStep(totalPages + 1);
             };
 
-            const finishSurvey = () => {
-                const recommended = calculateResult();
-                setResult(recommended);
-                setStep(6);
-            };
+            const currentQuestions = useMemo(() => {
+                if (step === 0 || step > totalPages) return [];
+                const startIndex = (step - 1) * 2;
+                return QUESTIONS_DB.slice(startIndex, startIndex + 2);
+            }, [step]);
 
-            const resetSurvey = () => {
-                setStep(0);
-                setScores({ SI: 5, EI: 5, FI: 5, EnI: 5, SEI: 5 });
-                setResult(null);
-            };
+            const canProceed = currentQuestions.every(q => answers[q.id] !== undefined);
 
             return (
-                <div className="min-h-screen flex flex-col items-center justify-center p-4 md:p-8 relative z-10">
-                    
-                    {step > 0 && step < 6 && <ProgressBar step={step} totalSteps={5} />}
+                <div className="h-screen w-full flex flex-col overflow-hidden bg-fuchsia-50">
+                    {step > 0 && step <= totalPages && <ProgressBar current={step} total={totalPages} />}
 
+                    {/* INTRO */}
                     {step === 0 && (
-                        <div className="text-center max-w-2xl w-full animate-pop-in glass-card p-8 md:p-12 rounded-[2.5rem] shadow-2xl mx-4">
-                            <div className="bg-gradient-to-tr from-purple-100 to-pink-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
-                                <Sparkles className="w-12 h-12 text-purple-600 animate-pulse" />
-                            </div>
-                            <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 mb-6 leading-tight tracking-tight">
-                                Find Your <br/> 
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">
-                                    Soul Fragrance
-                                </span>
-                            </h1>
-                            <p className="text-lg md:text-xl text-gray-600 mb-10 leading-relaxed max-w-lg mx-auto">
-                                An intelligent scent recommender based on your unique Stress, Energy, and Focus profile.
-                            </p>
-                            <button 
-                                onClick={() => setStep(1)}
-                                className="w-full md:w-auto bg-gray-900 hover:bg-black text-white text-xl px-12 py-5 rounded-2xl font-bold shadow-xl transition-all hover:-translate-y-1 active:translate-y-0"
-                            >
-                                Start Assessment
-                            </button>
-                        </div>
-                    )}
-
-                    {step === 1 && (
-                        <QuestionCard 
-                            indexKey="SI"
-                            value={scores.SI}
-                            onChange={(val) => handleScoreChange('SI', val)}
-                            icon={Wind}
-                            title="Stress Index"
-                            description="Rate your current stress level. Are you feeling anxious, overwhelmed, or having trouble sleeping?"
-                            nextStep={() => setStep(2)}
-                            prevStep={() => setStep(0)}
-                        />
-                    )}
-
-                    {step === 2 && (
-                        <QuestionCard 
-                            indexKey="EI"
-                            value={scores.EI}
-                            onChange={(val) => handleScoreChange('EI', val)}
-                            icon={Zap}
-                            title="Energy Index"
-                            description="How is your vitality? Are you feeling energetic and ready, or fatigued and slow?"
-                            nextStep={() => setStep(3)}
-                            prevStep={() => setStep(1)}
-                        />
-                    )}
-
-                    {step === 3 && (
-                        <QuestionCard 
-                            indexKey="FI"
-                            value={scores.FI}
-                            onChange={(val) => handleScoreChange('FI', val)}
-                            icon={Brain}
-                            title="Focus Index"
-                            description="Do you need mental clarity? Are you working on complex tasks or feeling scattered?"
-                            nextStep={() => setStep(4)}
-                            prevStep={() => setStep(2)}
-                        />
-                    )}
-
-                    {step === 4 && (
-                        <QuestionCard 
-                            indexKey="EnI"
-                            value={scores.EnI}
-                            onChange={(val) => handleScoreChange('EnI', val)}
-                            icon={Trees}
-                            title="Environment Index"
-                            description="Consider your surroundings. Are you exposed to pollution, harsh weather, or digital smog?"
-                            nextStep={() => setStep(5)}
-                            prevStep={() => setStep(3)}
-                        />
-                    )}
-
-                    {step === 5 && (
-                        <QuestionCard 
-                            indexKey="SEI"
-                            value={scores.SEI}
-                            onChange={(val) => handleScoreChange('SEI', val)}
-                            icon={Heart}
-                            title="Sensitivity Index"
-                            description="How emotionally vulnerable do you feel? Do you need nurturing and grounding?"
-                            isLast={true}
-                            nextStep={finishSurvey}
-                            prevStep={() => setStep(4)}
-                        />
-                    )}
-
-                    {/* FINAL RESULT SCREEN */}
-                    {step === 6 && result && (
-                        <div className="max-w-4xl w-full animate-pop-in glass-card rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[500px]">
-                            
-                            {/* Left Side: Visual */}
-                            <div className="md:w-1/3 bg-gradient-to-br from-purple-600 to-pink-600 p-8 md:p-12 text-white flex flex-col justify-between relative overflow-hidden">
-                                <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-                                
-                                <div className="relative z-10">
-                                    <div className="text-purple-200 font-bold uppercase tracking-widest text-sm mb-2">Match ID</div>
-                                    <div className="text-4xl font-mono font-bold">#{result.id.toString().padStart(3, '0')}</div>
+                        <div className="h-full w-full flex flex-col items-center justify-center p-6 text-center animate-fade-in relative overflow-hidden">
+                            <div className="absolute inset-0 sassy-bg opacity-90"></div>
+                            <div className="bg-white/40 backdrop-blur-xl p-12 rounded-[3rem] shadow-2xl border border-white/50 max-w-2xl w-full relative z-10">
+                                <div className="w-28 h-28 bg-white rounded-full shadow-xl flex items-center justify-center mb-10 mx-auto animate-bounce ring-4 ring-purple-200">
+                                    <Icons.Sparkles className="w-12 h-12 text-fuchsia-600" />
                                 </div>
-
-                                <div className="relative z-10 flex flex-col items-center my-8">
-                                    <div className="bg-white/20 backdrop-blur-md p-6 rounded-full mb-6">
-                                        <result.iconComponent className="w-16 h-16 text-white" />
-                                    </div>
-                                    <div className="text-center font-medium text-purple-100">
-                                        {INDEX_FULL_NAMES[result.primaryNeed]}
-                                    </div>
-                                </div>
-
-                                <div className="relative z-10 text-xs text-purple-200 text-center opacity-75">
-                                    Generated by Fragrance AI
-                                </div>
-                            </div>
-
-                            {/* Right Side: Content */}
-                            <div className="md:w-2/3 p-8 md:p-12 flex flex-col justify-center bg-white/50">
-                                <div className="mb-2">
-                                    <span className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
-                                        Top Recommendation
-                                    </span>
-                                </div>
-                                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">{result.name}</h2>
-                                <p className="text-xl text-gray-600 mb-8 leading-relaxed font-light">
-                                    {result.description}
-                                </p>
-
-                                <div className="space-y-4 mb-10">
-                                    <div className="flex items-start">
-                                        <div className="w-32 flex-shrink-0 text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Primary Need</div>
-                                        <div className="font-semibold text-gray-800">{INDEX_FULL_NAMES[result.primaryNeed]}</div>
-                                    </div>
-                                    <div className="flex items-start">
-                                        <div className="w-32 flex-shrink-0 text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Triggers</div>
-                                        <div className="flex flex-wrap gap-2">
-                                            {result.moods.map((m, i) => (
-                                                <span key={i} className="text-sm bg-gray-100 text-gray-600 px-3 py-1 rounded-md border border-gray-200">
-                                                    {m}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <button 
-                                    onClick={resetSurvey}
-                                    className="self-start flex items-center gap-2 text-gray-500 font-semibold hover:text-purple-600 transition-colors group"
-                                >
-                                    <RefreshCw className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />
-                                    Start New Assessment
+                                <h1 className="text-6xl md:text-8xl font-black mb-6 text-slate-900 serif-font tracking-tight">Scent Soul</h1>
+                                <p className="text-2xl text-slate-700 font-medium mb-12 leading-relaxed">Unlock your aura. Discover the fragrance that perfectly matches your energy and vibe.</p>
+                                <button onClick={() => setStep(1)} className="bg-slate-900 text-white px-12 py-5 rounded-full text-xl font-bold shadow-2xl hover:scale-105 transition-all flex items-center gap-3 mx-auto group hover:bg-black">
+                                    Start Journey <Icons.ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                 </button>
                             </div>
-
                         </div>
                     )}
 
+                    {/* QUESTIONS */}
+                    {step > 0 && step <= totalPages && (
+                        <div className="h-full w-full overflow-y-auto relative">
+                            <div className="absolute inset-0 bg-gradient-to-br from-purple-50 via-pink-50 to-white -z-10"></div>
+                            <div className="max-w-3xl mx-auto w-full p-6 pt-16 pb-32 animate-fade-in">
+                                {currentQuestions.map(q => (
+                                    <QuestionCard key={q.id} question={q} answer={answers[q.id]} onAnswer={handleAnswer} />
+                                ))}
+                                <div className="fixed bottom-0 left-0 w-full bg-white/80 backdrop-blur-lg border-t border-white/60 p-4 flex justify-center items-center gap-6 z-40 shadow-lg">
+                                    <button onClick={() => setStep(s => s - 1)} className="text-gray-400 font-bold hover:text-slate-800 px-6 py-3 transition-colors">Back</button>
+                                    <button onClick={() => step === totalPages ? calculateResult() : setStep(s => s + 1)} disabled={!canProceed}
+                                        className={`px-12 py-4 rounded-full font-bold text-xl shadow-xl transition-all flex items-center gap-3 ${canProceed ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:scale-105 hover:shadow-purple-300' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}>
+                                        {step === totalPages ? "Reveal Match" : "Next Question"} <Icons.ArrowRight className="w-6 h-6" />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* RESULT */}
+                    {step > totalPages && result && (
+                        <div className="h-full w-full flex flex-col md:flex-row overflow-hidden animate-fade-in bg-white">
+                            <div className="md:w-5/12 h-[40vh] md:h-full relative overflow-hidden flex items-center justify-center bg-slate-900 group">
+                                <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-900 via-purple-900 to-indigo-900"></div>
+                                <div className="absolute inset-0 bg-cover bg-center mix-blend-overlay transition-transform duration-[20s] hover:scale-110 opacity-70" style={{ backgroundImage: `url('${result.image}')` }}></div>
+                                <div className="relative z-10 w-full max-w-sm mx-6 p-10 rounded-[2.5rem] bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl text-center text-white overflow-hidden">
+                                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-white/40 to-transparent"></div>
+                                    <div className="inline-block mb-8 p-5 rounded-full bg-white/10 ring-1 ring-white/30 backdrop-blur-md shadow-lg"><result.iconComponent className="w-12 h-12 text-white drop-shadow-md" /></div>
+                                    <div className="text-xs font-bold tracking-[0.4em] uppercase text-white/60 mb-2">Signature Scent</div>
+                                    <div className="text-6xl font-mono font-light tracking-tighter mb-6 opacity-90">#{result.id.toString().padStart(3, '0')}</div>
+                                    <h2 className="text-3xl md:text-4xl font-bold serif-font mb-2 drop-shadow-lg">{result.name}</h2>
+                                    <div className="text-sm font-medium tracking-wider uppercase opacity-70 mt-2">{INDEX_FULL_NAMES[result.primaryNeed]} Focus</div>
+                                </div>
+                            </div>
+                            <div className="md:w-7/12 h-[60vh] md:h-full overflow-y-auto bg-white custom-scrollbar">
+                                <div className="p-8 md:p-16 max-w-2xl mx-auto">
+                                    <div className="mb-10">
+                                        <span className="inline-block py-1.5 px-4 rounded-full bg-fuchsia-50 text-fuchsia-700 text-xs font-bold uppercase tracking-widest mb-4 border border-fuchsia-100">Perfect Match</span>
+                                        <h2 className="text-5xl md:text-6xl font-black text-slate-900 leading-tight mb-4">{result.name}</h2>
+                                        <p className="text-xl text-slate-500 font-light leading-relaxed">{result.description}</p>
+                                    </div>
+                                    <div className="flex flex-wrap gap-3 mb-10">
+                                        {result.moods.map((m, i) => (
+                                            <span key={i} className="px-5 py-2.5 rounded-xl border border-slate-100 bg-slate-50 text-slate-600 font-semibold text-sm shadow-sm hover:shadow-md transition-shadow cursor-default">{m}</span>
+                                        ))}
+                                    </div>
+                                    <div className="mb-12">
+                                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Your Resonance Profile</h3>
+                                        <div className="space-y-5">
+                                            {Object.entries(finalScores).map(([key, val]) => {
+                                                const pct = val * 10;
+                                                let barColor = 'bg-indigo-300';
+                                                if (pct > 40) barColor = 'bg-purple-400';
+                                                if (pct > 75) barColor = 'bg-fuchsia-500';
+                                                return (
+                                                    <div key={key}>
+                                                        <div className="flex justify-between items-end mb-2">
+                                                            <span className="text-sm font-bold text-slate-700">{INDEX_FULL_NAMES[key]}</span>
+                                                            <span className="text-sm font-bold" style={{ color: pct > 75 ? '#d946ef' : '#64748b' }}>{pct}%</span>
+                                                        </div>
+                                                        <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
+                                                            <div className={`h-full rounded-full transition-all duration-1000 ease-out ${barColor} shadow-sm`} style={{ width: `${pct}%` }}></div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                    <div className="pt-8 border-t border-gray-100 text-center">
+                                        <button onClick={() => { setStep(0); setAnswers({}); }} className="inline-flex items-center gap-2 text-slate-400 hover:text-fuchsia-600 font-bold transition-colors py-3 px-6 rounded-full hover:bg-fuchsia-50">
+                                            <Icons.RefreshCw className="w-5 h-5" /> Retake Assessment
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             );
         }
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<FragranceSurvey />);
+        root.render(<App />);
     </script>
 </body>
 </html>
